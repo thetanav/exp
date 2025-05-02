@@ -3,13 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Transaction, editTransaction } from "@/utils/dataManager";
-
-const categories = [
-  { name: "Food", emoji: "🍔" },
-  { name: "Entertainment", emoji: "🎉" },
-  { name: "Shopping", emoji: "🛍️" },
-  { name: "Other", emoji: "💼" },
-];
+import categories from "@/lib/categories";
 
 interface EditTransactionFormProps {
   transaction: Transaction;
@@ -71,19 +65,14 @@ export default function EditTransactionForm({
             <Button
               key={category.name}
               type="button"
-              variant={
-                selectedCategory === category.name ? "default" : "outline"
-              }
+              variant={selectedCategory === category.name ? "outline" : "ghost"}
               onClick={() => setSelectedCategory(category.name)}
               className="flex flex-col items-center p-3 h-auto">
               <img
-                src={`https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/${category.emoji
-                  .codePointAt(0)
-                  ?.toString(16)}.png`}
+                src={`https://emojicdn.elk.sh/${category.emoji}?style=apple`}
                 alt={category.name}
                 className="w-9 h-9 mb-1"
               />
-              <span className="text-xs scale-[0.85]">{category.name}</span>
             </Button>
           ))}
         </div>

@@ -44,7 +44,12 @@ export default function Home() {
     useState<Transaction | null>(null);
 
   useEffect(() => {
-    setTransactions(getTransactions());
+    const interval = setInterval(() => {
+      setTransactions(getTransactions());
+    }, 1000);
+
+    // Cleanup function to clear the interval when component unmounts
+    return () => clearInterval(interval);
   }, []);
 
   const thisMonthExpense = transactions

@@ -11,13 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-
-const categories = [
-  { name: "Food", emoji: "🍔" },
-  { name: "Shopping", emoji: "🛍️" },
-  { name: "Education", emoji: "📚" },
-  { name: "Other", emoji: "💼" },
-];
+import categories from "@/lib/categories";
 
 interface AddTransactionFormProps {
   type: "expense" | "income";
@@ -80,19 +74,14 @@ export default function AddTransactionForm({
             <Button
               key={category.name}
               type="button"
-              variant={
-                selectedCategory === category.name ? "default" : "outline"
-              }
+              variant={selectedCategory === category.name ? "outline" : "ghost"}
               onClick={() => setSelectedCategory(category.name)}
-              className="flex flex-col items-center p-3 h-auto hover:scale-95 transition-transform">
+              className="flex flex-col items-center p-3 h-auto">
               <img
-                src={`https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/${category.emoji
-                  .codePointAt(0)
-                  ?.toString(16)}.png`}
+                src={`https://emojicdn.elk.sh/${category.emoji}?style=apple`}
                 alt={category.name}
                 className="w-10 h-10 mb-1"
               />
-              <span className="text-xs scale-90">{category.name}</span>
             </Button>
           ))}
         </div>

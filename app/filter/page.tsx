@@ -12,13 +12,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import BackButton from "@/components/back-button";
-
-const allTags = [
-  { name: "Food", emoji: "🍔" },
-  { name: "Entertainment", emoji: "🎉" },
-  { name: "Shopping", emoji: "🛍️" },
-  { name: "Other", emoji: "💼" },
-];
+import categories from "@/lib/categories";
 
 export default function FilterTags() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -41,7 +35,7 @@ export default function FilterTags() {
       <BackButton />
       <div className="flex items-center justify-between px-5 gap-4 mb-3">
         <h2 className="text-lg font-semibold tracking-tight">Filter</h2>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
               Select Tags
@@ -49,16 +43,15 @@ export default function FilterTags() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
-            {allTags.map((tag) => (
+            {categories.map((tag) => (
               <DropdownMenuCheckboxItem
                 key={tag.name}
                 checked={selectedTags.includes(tag.name)}
-                onCheckedChange={() => toggleTag(tag.name)}>
+                onCheckedChange={() => toggleTag(tag.name)}
+                className="cursor-pointer">
                 <div className="flex items-center">
                   <img
-                    src={`https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/${tag.emoji
-                      .codePointAt(0)
-                      ?.toString(16)}.png`}
+                    src={`https://emojicdn.elk.sh/${tag.emoji}?style=apple`}
                     alt={tag.name}
                     className="w-6 h-6 mr-2"
                   />
