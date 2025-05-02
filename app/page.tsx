@@ -3,14 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  ArrowLeft,
-  BrainCogIcon,
-  EllipsisVerticalIcon,
-  Filter,
-  FilterIcon,
-} from "lucide-react";
+import { BrainCogIcon, EllipsisVerticalIcon, FilterIcon } from "lucide-react";
 import {
   getTransactions,
   Transaction,
@@ -36,7 +29,6 @@ import { format } from "date-fns";
 import BottomNav from "@/components/BottomNav";
 import Expninc from "@/components/expninc";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import BackButton from "@/components/back-button";
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -90,7 +82,7 @@ export default function Home() {
       />
       <div className="flex justify-between px-4">
         <h2 className="text-lg font-semibold tracking-tight">
-          Recent Transactions
+          recent transactions
         </h2>
         <div className="flex gap-1">
           <Link
@@ -133,7 +125,7 @@ export default function Home() {
                     <EllipsisVerticalIcon className="h-4 w-4 outline-none" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom">
+                <DropdownMenuContent side="left">
                   <DropdownMenuLabel asChild>
                     {editDialog({
                       transaction,
