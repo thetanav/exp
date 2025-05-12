@@ -77,14 +77,6 @@ export default function Home() {
 
   return (
     <div className="h-full w-full flex flex-col gap-6">
-      <div className="flex w-full items-center justify-end mt-5">
-        <Link
-          href="/wallet"
-          className="px-6 h-full rounded-full bg-red-500 text-white font-bold flex items-center justify-center mr-2">
-          Wallet
-        </Link>
-        <UserButton />
-      </div>
       <Expninc
         thisMonthEarning={thisMonthEarning}
         thisMonthExpense={thisMonthExpense}

@@ -8,6 +8,7 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { embeddedWallet } from "@civic/auth-web3/wagmi";
 import { mainnet } from "viem/chains";
+import UserLogin from "@/components/UserLogin";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -36,9 +37,9 @@ export default function RootLayout({
       <WagmiProvider config={wagmiConfig}>
         <CivicAuthProvider>
           <html lang="en">
-            <body
-              className={`${geist.className} max-w-md h-screen mx-auto light`}>
-              <div className="w-full h-full">{children}</div>
+            <body className={`${geist.className} h-screen light`}>
+              <UserLogin />
+              <div className="w-full h-full max-w-md mx-auto">{children}</div>
             </body>
           </html>
         </CivicAuthProvider>
