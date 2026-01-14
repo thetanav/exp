@@ -22,19 +22,26 @@ export default function EditTransactionForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const parsedAmount = Number.parseFloat(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) return;
+    if (!selectedCategory) return;
+
     editTransaction({
       ...transaction,
-      title,
-      amount: parseFloat(amount),
+      title: title.trim(),
+      amount: parsedAmount,
       category: selectedCategory,
     });
+
+    window.dispatchEvent(new Event("transactions:changed"));
     onComplete();
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div>
-        <Label htmlFor="title" className="text-sm font-medium">
+        <Label htmlFor="title" className="text-xs font-medium">
           Title
         </Label>
         <Input
@@ -52,6 +59,9 @@ export default function EditTransactionForm({
         <Input
           id="amount"
           type="number"
+          inputMode="decimal"
+          min={0.01}
+          step={0.01}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
@@ -67,12 +77,15 @@ export default function EditTransactionForm({
               type="button"
               variant={selectedCategory === category.name ? "outline" : "ghost"}
               onClick={() => setSelectedCategory(category.name)}
-              className="flex flex-col items-center p-3 h-auto">
+              className="flex flex-col items-center p-2 h-auto">
               <img
                 src={`https://emojicdn.elk.sh/${category.emoji}?style=apple`}
                 alt={category.name}
                 className="w-9 h-9 mb-1"
               />
+              <span className="text-[10px] leading-none text-muted-foreground">
+                {category.name}
+              </span>
             </Button>
           ))}
         </div>

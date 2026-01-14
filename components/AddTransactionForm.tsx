@@ -24,19 +24,25 @@ export default function AddTransactionForm({
 }: AddTransactionFormProps) {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]?.name ?? "");
   const [date, setDate] = useState<Date>(new Date());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const parsedAmount = Number.parseFloat(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) return;
+    if (!selectedCategory) return;
+
     saveTransaction({
       type,
-      title,
-      amount: parseFloat(amount),
+      title: title.trim(),
+      amount: parsedAmount,
       category: selectedCategory,
-      //@ts-ignore
       date: date.toISOString(),
     });
+
+    window.dispatchEvent(new Event("transactions:changed"));
     onClose();
   };
 
@@ -50,6 +56,7 @@ export default function AddTransactionForm({
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Coffee, rent, salary"
           required
           className="text-md py-2"
         />
@@ -61,6 +68,10 @@ export default function AddTransactionForm({
         <Input
           id="amount"
           type="number"
+          inputMode="decimal"
+          min={0.01}
+          step={0.01}
+          placeholder="0.00"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
@@ -69,19 +80,22 @@ export default function AddTransactionForm({
       </div>
       <div>
         <Label className="text-xs font-medium">Category</Label>
-        <div className="grid grid-cols-4 gap-3 mt-2">
+        <div className="grid grid-cols-4 gap-2 mt-2">
           {categories.map((category) => (
             <Button
               key={category.name}
               type="button"
               variant={selectedCategory === category.name ? "outline" : "ghost"}
               onClick={() => setSelectedCategory(category.name)}
-              className="flex flex-col items-center p-3 h-auto">
+              className="flex flex-col items-center p-2 h-auto">
               <img
                 src={`https://emojicdn.elk.sh/${category.emoji}?style=apple`}
                 alt={category.name}
-                className="w-10 h-10 mb-1"
+                className="w-9 h-9 mb-1"
               />
+              <span className="text-[10px] leading-none text-muted-foreground">
+                {category.name}
+              </span>
             </Button>
           ))}
         </div>

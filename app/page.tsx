@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BrainCogIcon, EllipsisVerticalIcon, FilterIcon } from "lucide-react";
 import {
+  deleteTransaction,
   getTransactions,
   Transaction,
-  deleteTransaction,
 } from "@/utils/dataManager";
 import {
   Dialog,
@@ -29,7 +29,6 @@ import { format } from "date-fns";
 import BottomNav from "@/components/BottomNav";
 import Expninc from "@/components/expninc";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { UserButton } from "@civic/auth-web3/react";
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -37,12 +36,22 @@ export default function Home() {
     useState<Transaction | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTransactions(getTransactions());
-    }, 1000);
+    setTransactions(getTransactions());
 
-    // Cleanup function to clear the interval when component unmounts
-    return () => clearInterval(interval);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "transactions") {
+        setTransactions(getTransactions());
+      }
+    };
+
+    const onTransactionsChanged = () => setTransactions(getTransactions());
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("transactions:changed", onTransactionsChanged);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("transactions:changed", onTransactionsChanged);
+    };
   }, []);
 
   const thisMonthExpense = transactions
@@ -64,6 +73,7 @@ export default function Home() {
   const handleDelete = (id: string) => {
     deleteTransaction(id);
     setTransactions(getTransactions());
+    window.dispatchEvent(new Event("transactions:changed"));
   };
 
   const handleEdit = (transaction: Transaction) => {
@@ -76,76 +86,85 @@ export default function Home() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col gap-6">
+    <div className="h-full w-full flex flex-col gap-6 pt-4">
       <Expninc
         thisMonthEarning={thisMonthEarning}
         thisMonthExpense={thisMonthExpense}
       />
-      <div className="flex justify-between px-4">
-        <h2 className="text-lg font-semibold tracking-tight">
-          recent transactions
-        </h2>
-        <div className="flex gap-1">
-          <Link
-            className="px-3 py-1 rounded-full bg-accent flex items-center"
-            href="/analysis">
-            <BrainCogIcon className="h-4 w-4 text-black" />
-          </Link>
-          <Link
-            className="px-3 py-1 rounded-full bg-accent flex items-center"
-            href="/filter">
-            <FilterIcon className="h-4 w-4 text-black" />
-          </Link>
-          <BottomNav />
+        <div className="flex items-center justify-between px-4">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Transactions</h2>
+            <p className="text-xs text-muted-foreground">Local-only, no login.</p>
+          </div>
+          <div className="flex gap-1">
+            <Link
+              className="px-3 py-1 rounded-full bg-accent flex items-center"
+              href="/analysis"
+              aria-label="Analysis">
+              <BrainCogIcon className="h-4 w-4 text-foreground" />
+            </Link>
+            <Link
+              className="px-3 py-1 rounded-full bg-accent flex items-center"
+              href="/filter"
+              aria-label="Filter">
+              <FilterIcon className="h-4 w-4 text-foreground" />
+            </Link>
+            <BottomNav />
+          </div>
         </div>
-      </div>
       <ul className="overflow-x-auto px-4">
-        {transactions.map((transaction) => (
-          <li
-            key={transaction.id}
-            className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
-            <div>
-              <div className="flex gap-1 items-center text-xs text-muted-foreground">
-                <p>{format(new Date(transaction.date), "MMM d, yyyy")}</p>
-                <p>•</p>
-                <p>{transaction.category}</p>
+        {transactions.length === 0 ? (
+          <div className="text-sm text-muted-foreground px-1 py-8 text-center">
+            No transactions yet. Tap + to add one.
+          </div>
+        ) : (
+          transactions.map((transaction) => (
+            <li
+              key={transaction.id}
+              className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
+              <div>
+                <div className="flex gap-1 items-center text-xs text-muted-foreground">
+                  <p>{format(new Date(transaction.date), "MMM d, yyyy")}</p>
+                  <p>•</p>
+                  <p>{transaction.category}</p>
+                </div>
+                <p className="font-medium">{transaction.title}</p>
               </div>
-              <p className="font-medium">{transaction.title}</p>
-            </div>
-            <div className="flex items-center">
-              <span
-                className={`font-semibold mr-2 ${
-                  transaction.type === "expense" && "text-red-500"
-                }`}>
-                ${transaction.amount.toFixed(2)}
-              </span>
+              <div className="flex items-center">
+                <span
+                  className={`font-semibold mr-2 ${
+                    transaction.type === "expense" && "text-red-500"
+                  }`}>
+                  ${transaction.amount.toFixed(2)}
+                </span>
 
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <button>
-                    <EllipsisVerticalIcon className="h-4 w-4 outline-none" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="left">
-                  <DropdownMenuLabel asChild>
-                    {editDialog({
-                      transaction,
-                      handleEdit,
-                      handleEditComplete,
-                      editingTransaction,
-                    })}
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem asChild>
-                    {deleteDialog({
-                      transaction,
-                      handleDelete,
-                    })}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </li>
-        ))}
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button>
+                      <EllipsisVerticalIcon className="h-4 w-4 outline-none" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="left">
+                    <DropdownMenuLabel asChild>
+                      {editDialog({
+                        transaction,
+                        handleEdit,
+                        handleEditComplete,
+                        editingTransaction,
+                      })}
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                      {deleteDialog({
+                        transaction,
+                        handleDelete,
+                      })}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </li>
+          ))
+        )}
       </ul>
     </div>
   );

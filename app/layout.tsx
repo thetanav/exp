@@ -1,31 +1,7 @@
-"use client";
-
 import "@/app/globals.css";
 import { Geist } from "next/font/google";
-import { CivicAuthProvider } from "@civic/auth-web3/nextjs";
-import { WagmiProvider, createConfig, http } from "wagmi";
-//@ts-ignore
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { embeddedWallet } from "@civic/auth-web3/wagmi";
-import { mainnet } from "viem/chains";
-import UserLogin from "@/components/UserLogin";
 
 const geist = Geist({ subsets: ["latin"] });
-
-// export const metadata = {
-//   title: "Expense Tracker",
-//   description: "Track your expenses and earnings",
-// };
-
-const wagmiConfig = createConfig({
-  chains: [mainnet],
-  transports: {
-    [mainnet.id]: http(),
-  },
-  connectors: [embeddedWallet()],
-});
-
-const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -33,17 +9,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={wagmiConfig}>
-        <CivicAuthProvider>
-          <html lang="en">
-            <body className={`${geist.className} h-screen light`}>
-              <UserLogin />
-              <div className="w-full h-full max-w-md mx-auto">{children}</div>
-            </body>
-          </html>
-        </CivicAuthProvider>
-      </WagmiProvider>
-    </QueryClientProvider>
+    <html lang="en">
+      <body className={`${geist.className} min-h-screen bg-background text-foreground`}>
+        <div className="w-full min-h-screen max-w-md mx-auto">{children}</div>
+      </body>
+    </html>
   );
 }

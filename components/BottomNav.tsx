@@ -13,6 +13,7 @@ export default function BottomNav() {
 
   const handleClose = () => {
     setIsOpen(false);
+    window.dispatchEvent(new Event("transactions:changed"));
     router.refresh();
   };
 

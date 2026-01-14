@@ -7,12 +7,12 @@ export interface Transaction {
   date: string;
 }
 
-export function saveTransaction(transaction: Omit<Transaction, 'id' | 'date'>) {
+export function saveTransaction(transaction: Omit<Transaction, 'id' | 'date'> & { date?: string }) {
   const transactions = getTransactions();
   const newTransaction: Transaction = {
     ...transaction,
     id: Date.now().toString(),
-    date: new Date().toISOString(),
+    date: transaction.date ?? new Date().toISOString(),
   };
   transactions.push(newTransaction);
   localStorage.setItem('transactions', JSON.stringify(transactions));
