@@ -29,6 +29,63 @@ export function getFilteredTransactions(tags: string[]): Transaction[] {
   return transactions.filter(transaction => tags.includes(transaction.category));
 }
 
+export interface FilterOptions {
+  search?: string;
+  categories?: string[];
+  type?: 'expense' | 'income';
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export function getAdvancedFilteredTransactions(options: FilterOptions): Transaction[] {
+  const transactions = getTransactions();
+  
+  return transactions.filter(transaction => {
+    // Search filter
+    if (options.search) {
+      const searchLower = options.search.toLowerCase();
+      if (!transaction.title.toLowerCase().includes(searchLower)) {
+        return false;
+      }
+    }
+    
+    // Category filter
+    if (options.categories && options.categories.length > 0) {
+      if (!options.categories.includes(transaction.category)) {
+        return false;
+      }
+    }
+    
+    // Type filter
+    if (options.type) {
+      if (transaction.type !== options.type) {
+        return false;
+      }
+    }
+    
+    // Date range filter
+    if (options.dateFrom || options.dateTo) {
+      const transactionDate = new Date(transaction.date);
+      if (options.dateFrom) {
+        const fromDate = new Date(options.dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        if (transactionDate < fromDate) {
+          return false;
+        }
+      }
+      if (options.dateTo) {
+        const toDate = new Date(options.dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        if (transactionDate > toDate) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
+  });
+}
+
 export function deleteTransaction(id: string) {
   const transactions = getTransactions();
   const updatedTransactions = transactions.filter(t => t.id !== id);

@@ -2,96 +2,266 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { getFilteredTransactions, Transaction } from "@/utils/dataManager";
+import { Input } from "@/components/ui/input";
+import {
+  getAdvancedFilteredTransactions,
+  FilterOptions,
+  Transaction,
+} from "@/utils/dataManager";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import BackButton from "@/components/back-button";
 import categories from "@/lib/categories";
+import { CalendarIcon, ListFilterPlus, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function FilterTags() {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+export default function FilterPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({});
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[]
   >([]);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<
+    "expense" | "income" | undefined
+  >(undefined);
 
   useEffect(() => {
-    setFilteredTransactions(getFilteredTransactions(selectedTags));
-  }, [selectedTags]);
+    const options: FilterOptions = {
+      search: searchQuery || undefined,
+      categories:
+        selectedCategories.length > 0 ? selectedCategories : undefined,
+      type: selectedType,
+      dateFrom: dateFrom ? format(dateFrom, "yyyy-MM-dd") : undefined,
+      dateTo: dateTo ? format(dateTo, "yyyy-MM-dd") : undefined,
+    };
+    setFilterOptions(options);
+    setFilteredTransactions(getAdvancedFilteredTransactions(options));
+  }, [searchQuery, selectedCategories, selectedType, dateFrom, dateTo]);
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
     );
   };
 
+  const toggleType = (type: "expense" | "income") => {
+    setSelectedType((prev) => (prev === type ? undefined : type));
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setSelectedCategories([]);
+    setSelectedType(undefined);
+  };
+
+  const hasActiveFilters =
+    searchQuery ||
+    selectedCategories.length > 0 ||
+    selectedType ||
+    dateFrom ||
+    dateTo;
+
   return (
-    <div className="pt-16">
-      <BackButton />
-      <div className="flex items-center justify-between px-5 gap-4 mb-3">
-        <h2 className="text-lg font-semibold tracking-tight">Filter</h2>
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              Select Tags
-              <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            {categories.map((tag) => (
-              <DropdownMenuCheckboxItem
-                key={tag.name}
-                checked={selectedTags.includes(tag.name)}
-                onCheckedChange={() => toggleTag(tag.name)}
-                className="cursor-pointer">
-                <div className="flex items-center">
-                  <img
-                    src={`https://emojicdn.elk.sh/${tag.emoji}?style=apple`}
-                    alt={tag.name}
-                    className="w-6 h-6 mr-2"
-                  />
-                  {tag.name}
+    <div className="h-full w-full flex flex-col gap-6 pt-4">
+      <div className="flex items-center justify-between px-4">
+        <div>
+          <BackButton />
+          <h2 className="text-lg font-semibold tracking-tight">Filter</h2>
+        </div>
+      </div>
+      <div className="px-4">
+        <div className="flex gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 w-4 -translate-y-1/2 opacity-60" />
+            <Input
+              type="text"
+              placeholder="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-7"
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size={"icon"}>
+                <ListFilterPlus />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 p-4" align="end">
+              <div className="space-y-4">
+                {/* Date Range */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Date Range</Label>
+                  <div className="flex gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !dateFrom && "text-muted-foreground"
+                          )}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateFrom ? (
+                            format(dateFrom, "MMM dd, yyyy")
+                          ) : (
+                            <span>From date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateFrom}
+                          onSelect={setDateFrom}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !dateTo && "text-muted-foreground"
+                          )}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateTo ? (
+                            format(dateTo, "MMM dd, yyyy")
+                          ) : (
+                            <span>To date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateTo}
+                          onSelect={setDateTo}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+                {/* Category/Emoji Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Categories</Label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {categories.map((category) => (
+                      <div
+                        key={category.name}
+                        className="flex items-center space-x-2">
+                        <Checkbox
+                          id={category.name}
+                          checked={selectedCategories.includes(category.name)}
+                          onCheckedChange={() => toggleCategory(category.name)}
+                        />
+                        <Label
+                          htmlFor={category.name}
+                          className="flex items-center gap-2 cursor-pointer">
+                          <img
+                            src={`https://emojicdn.elk.sh/${category.emoji}?style=apple`}
+                            alt={category.name}
+                            className="w-5 h-5"
+                          />
+                          <span>{category.name}</span>
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Type Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Type</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="expense"
+                        checked={selectedType === "expense"}
+                        onCheckedChange={() => toggleType("expense")}
+                      />
+                      <Label htmlFor="expense" className="cursor-pointer">
+                        Expenses
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="income"
+                        checked={selectedType === "income"}
+                        onCheckedChange={() => toggleType("income")}
+                      />
+                      <Label htmlFor="income" className="cursor-pointer">
+                        Incomes
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="w-full">
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <ul className="overflow-x-auto px-4">
         {filteredTransactions.length === 0 ? (
-          <p className="text-center text-muted-foreground">
+          <div className="text-sm text-muted-foreground px-1 py-8 text-center">
             No transactions found
-          </p>
+          </div>
         ) : (
-          <ul>
-            {filteredTransactions.map((transaction) => (
-              <li
-                key={transaction.id}
-                className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
-                <div>
-                  <div className="flex gap-1 items-center text-xs text-muted-foreground">
-                    <p>{format(new Date(transaction.date), "MMM d, yyyy")}</p>
-                    <p>•</p>
-                    <p>{transaction.category}</p>
-                  </div>
-                  <p className="font-medium">{transaction.title}</p>
+          filteredTransactions.map((transaction) => (
+            <li
+              key={transaction.id}
+              className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
+              <div>
+                <div className="flex gap-1 items-center text-xs text-muted-foreground">
+                  <p>{format(new Date(transaction.date), "MMM d, yyyy")}</p>
+                  <p>•</p>
+                  <p>{transaction.category}</p>
                 </div>
-                <div className="flex items-center">
-                  <span
-                    className={`font-semibold mr-2 ${
-                      transaction.type === "expense" && "text-red-500"
-                    }`}>
-                    ${transaction.amount.toFixed(2)}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
+                <p className="font-medium">{transaction.title}</p>
+              </div>
+              <div className="flex items-center">
+                <span
+                  className={`font-semibold mr-2 ${
+                    transaction.type === "expense" && "text-red-500"
+                  }`}>
+                  ${transaction.amount.toFixed(2)}
+                </span>
+              </div>
+            </li>
+          ))
         )}
       </ul>
     </div>

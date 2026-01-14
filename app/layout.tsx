@@ -10,8 +10,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geist.className} min-h-screen bg-background text-foreground`}>
-        <div className="w-full min-h-screen max-w-md mx-auto">{children}</div>
+      <body
+        className={`${geist.className} min-h-screen bg-background text-foreground`}>
+        <div className="w-full min-h-screen max-w-md mx-auto border border-l border-r">
+          {children}
+        </div>
       </body>
     </html>
   );

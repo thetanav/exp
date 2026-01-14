@@ -15,17 +15,17 @@ export default function Expninc({
   const total = thisMonthEarning - thisMonthExpense;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2 h-60">
-      <p className={`text-lg text-black/60 tracking-tight ${serif.className}`}>
+    <div className="flex flex-col items-center justify-center gap-2 h-60 bg-linear-to-b from-neutral-100 to-background">
+      <p className={`text-xl text-black/60 tracking-tight ${serif.className}`}>
         Total balance
       </p>
       <AnimatePresence mode="wait">
         <motion.h2
           key={total}
-          initial={{ y: 20, opacity: 0 }}
+          initial={{ y: 5, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -20, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{ duration: 0.1, ease: "linear" }}
           className={`text-5xl font-semibold transition-all ${
             total < 0 && "text-red-500"
           } ${mono.className}`}>

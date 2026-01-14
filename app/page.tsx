@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BrainCogIcon, EllipsisVerticalIcon, FilterIcon } from "lucide-react";
+import {
+  BrainCogIcon,
+  EllipsisVerticalIcon,
+  FilterIcon,
+  ScrollText,
+} from "lucide-react";
 import {
   deleteTransaction,
   getTransactions,
@@ -86,32 +91,32 @@ export default function Home() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col gap-6 pt-4">
+    <div className="h-full w-full flex flex-col gap-6">
       <Expninc
         thisMonthEarning={thisMonthEarning}
         thisMonthExpense={thisMonthExpense}
       />
-        <div className="flex items-center justify-between px-4">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight">Transactions</h2>
-            <p className="text-xs text-muted-foreground">Local-only, no login.</p>
-          </div>
-          <div className="flex gap-1">
-            <Link
-              className="px-3 py-1 rounded-full bg-accent flex items-center"
-              href="/analysis"
-              aria-label="Analysis">
-              <BrainCogIcon className="h-4 w-4 text-foreground" />
-            </Link>
-            <Link
-              className="px-3 py-1 rounded-full bg-accent flex items-center"
-              href="/filter"
-              aria-label="Filter">
-              <FilterIcon className="h-4 w-4 text-foreground" />
-            </Link>
-            <BottomNav />
-          </div>
+      <div className="flex items-center justify-between px-4">
+        <div className="flex gap-1 items-center">
+          <ScrollText className="opacity-60 w-4" />
+          <h2 className="text-lg font-semibold tracking-tight">Transactions</h2>
         </div>
+        <div className="flex gap-1">
+          <Link
+            className="px-3 py-1 rounded-full bg-accent flex items-center"
+            href="/analysis"
+            aria-label="Analysis">
+            <BrainCogIcon className="h-4 w-4 text-foreground" />
+          </Link>
+          <Link
+            className="px-3 py-1 rounded-full bg-accent flex items-center"
+            href="/filter"
+            aria-label="Filter">
+            <FilterIcon className="h-4 w-4 text-foreground" />
+          </Link>
+          <BottomNav />
+        </div>
+      </div>
       <ul className="overflow-x-auto px-4">
         {transactions.length === 0 ? (
           <div className="text-sm text-muted-foreground px-1 py-8 text-center">
