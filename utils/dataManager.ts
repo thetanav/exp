@@ -11,7 +11,7 @@ export function saveTransaction(transaction: Omit<Transaction, 'id' | 'date'> & 
   const transactions = getTransactions();
   const newTransaction: Transaction = {
     ...transaction,
-    id: Date.now().toString(),
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     date: transaction.date ?? new Date().toISOString(),
   };
   transactions.push(newTransaction);
@@ -19,8 +19,12 @@ export function saveTransaction(transaction: Omit<Transaction, 'id' | 'date'> & 
 }
 
 export function getTransactions(): Transaction[] {
-  const transactionsJson = localStorage.getItem('transactions');
-  return transactionsJson ? JSON.parse(transactionsJson) : [];
+  try {
+    const transactionsJson = localStorage.getItem('transactions');
+    return transactionsJson ? JSON.parse(transactionsJson) : [];
+  } catch {
+    return [];
+  }
 }
 
 export function getFilteredTransactions(tags: string[]): Transaction[] {

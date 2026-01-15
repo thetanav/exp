@@ -28,6 +28,7 @@ import BackButton from "@/components/back-button";
 import categories from "@/lib/categories";
 import { CalendarIcon, ListFilterPlus, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 export default function FilterPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,6 +45,7 @@ export default function FilterPage() {
   const [selectedType, setSelectedType] = useState<
     "expense" | "income" | undefined
   >(undefined);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const options: FilterOptions = {
@@ -86,9 +88,10 @@ export default function FilterPage() {
 
   return (
     <div className="h-full w-full flex flex-col pt-4">
-      <div className="flex-col items-center justify-between px-4">
+      <div className="flex items-center justify-between px-4">
         <BackButton />
         <h2 className="text-lg font-semibold tracking-tight">Filter</h2>
+        <div className="w-9" />
       </div>
       <div className="px-4 my-3">
         <div className="flex gap-1">
@@ -139,14 +142,18 @@ export default function FilterPage() {
                     <PopoverContent
                       className="w-auto p-0 overflow-hidden"
                       align="center">
-                      <Calendar
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        numberOfMonths={1} //TODO: on mobile 1 else 2
-                        className="overflow-scroll"
-                      />
+                        <Calendar
+                          mode="range"
+                          defaultMonth={dateRange?.from}
+                          selected={dateRange}
+                          onSelect={setDateRange}
+                          numberOfMonths={isMobile ? 1 : 2}
+                          className={cn(
+                            "overflow-scroll",
+                            "[&_.rdp-months]:flex-col sm:[&_.rdp-months]:flex-row",
+                            "[&_.rdp-month]:w-full sm:[&_.rdp-month]:w-auto"
+                          )}
+                        />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -221,7 +228,7 @@ export default function FilterPage() {
           </DropdownMenu>
         </div>
       </div>
-      <ul className="overflow-x-auto px-4">
+       <ul className="flex-1 overflow-y-auto px-4 pb-4">
         {filteredTransactions.length === 0 ? (
           <div className="text-sm text-muted-foreground px-1 py-8 text-center">
             No transactions found

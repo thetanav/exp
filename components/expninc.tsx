@@ -15,8 +15,8 @@ export default function Expninc({
   const total = thisMonthEarning - thisMonthExpense;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2 h-56 bg-linear-to-b from-neutral-100 to-background">
-      <p className={`text-xl text-black/60 tracking-tight ${serif.className}`}>
+    <div className="flex flex-col items-center justify-center gap-2 h-56 bg-linear-to-b from-neutral-100 to-background dark:from-neutral-900">
+      <p className={`text-xl text-foreground/60 tracking-tight ${serif.className}`}>
         Total balance
       </p>
       <AnimatePresence mode="wait">
@@ -27,9 +27,9 @@ export default function Expninc({
           exit={{ y: -20, opacity: 0 }}
           transition={{ duration: 0.1, ease: "linear" }}
           className={`text-5xl font-semibold transition-all ${
-            total < 0 && "text-red-500"
+            total < 0 ? "text-red-500" : ""
           } ${mono.className}`}>
-          ${Math.abs(total)}
+          {total < 0 ? "-" : ""}${Math.abs(total).toFixed(2)}
         </motion.h2>
       </AnimatePresence>
     </div>

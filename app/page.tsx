@@ -16,7 +16,9 @@ import {
 } from "@/utils/dataManager";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -33,7 +35,6 @@ import EditTransactionForm from "@/components/EditTransactionForm";
 import { format } from "date-fns";
 import BottomNav from "@/components/BottomNav";
 import Expninc from "@/components/expninc";
-import { DialogDescription } from "@radix-ui/react-dialog";
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -59,20 +60,30 @@ export default function Home() {
     };
   }, []);
 
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
   const thisMonthExpense = transactions
-    .filter(
-      (t) =>
+    .filter((t) => {
+      const txDate = new Date(t.date);
+      return (
         t.type === "expense" &&
-        new Date(t.date).getMonth() === new Date().getMonth()
-    )
+        txDate.getMonth() === currentMonth &&
+        txDate.getFullYear() === currentYear
+      );
+    })
     .reduce((sum, t) => sum + t.amount, 0);
 
   const thisMonthEarning = transactions
-    .filter(
-      (t) =>
+    .filter((t) => {
+      const txDate = new Date(t.date);
+      return (
         t.type === "income" &&
-        new Date(t.date).getMonth() === new Date().getMonth()
-    )
+        txDate.getMonth() === currentMonth &&
+        txDate.getFullYear() === currentYear
+      );
+    })
     .reduce((sum, t) => sum + t.amount, 0);
 
   const handleDelete = (id: string) => {
@@ -138,14 +149,17 @@ export default function Home() {
               <div className="flex items-center">
                 <span
                   className={`font-semibold mr-2 ${
-                    transaction.type === "expense" && "text-red-500"
+                    transaction.type === "expense"
+                      ? "text-red-500"
+                      : "text-green-500"
                   }`}>
-                  ${transaction.amount.toFixed(2)}
+                  {transaction.type === "expense" ? "-" : "+"}$
+                  {transaction.amount.toFixed(2)}
                 </span>
 
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
-                    <button>
+                    <button aria-label="Transaction options">
                       <EllipsisVerticalIcon className="h-4 w-4 outline-none" />
                     </button>
                   </DropdownMenuTrigger>
@@ -175,10 +189,15 @@ export default function Home() {
   );
 }
 
-function deleteDialog({ transaction, handleDelete }: any) {
+function deleteDialog({
+  transaction,
+  handleDelete,
+}: {
+  transaction: Transaction;
+  handleDelete: (id: string) => void;
+}) {
   return (
     <Dialog modal={false}>
-      <DialogTitle className="sr-only">Delete!?</DialogTitle>
       <DialogTrigger asChild>
         <Button variant="ghost" className="w-full cursor-pointer justify-start">
           Delete
@@ -187,15 +206,21 @@ function deleteDialog({ transaction, handleDelete }: any) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Transaction</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this transaction?
+          </DialogDescription>
         </DialogHeader>
-        <DialogDescription>Are you sure?</DialogDescription>
         <DialogFooter className="flex flex-row gap-2 justify-end">
-          <Button>Cancel</Button>
-          <Button
-            onClick={() => handleDelete(transaction.id)}
-            variant="outline">
-            Delete
-          </Button>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button
+              onClick={() => handleDelete(transaction.id)}
+              variant="destructive">
+              Delete
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -38,13 +38,15 @@ export default function AddTransactionForm({
     const parsedAmount = Number.parseFloat(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) return;
     if (!selectedCategory) return;
+    if (!title.trim()) return;
+    if (!date) return;
 
     saveTransaction({
       type,
       title: title.trim(),
       amount: parsedAmount,
       category: selectedCategory,
-      date: date!.toISOString(),
+      date: date.toISOString(),
     });
 
     window.dispatchEvent(new Event("transactions:changed"));

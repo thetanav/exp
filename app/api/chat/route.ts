@@ -1,16 +1,28 @@
 import { convertToModelMessages, streamText, UIMessage } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages, transactions }: { messages: UIMessage[]; transactions: any[] } = await req.json();
+  const {
+    messages,
+    transactions,
+    openRouterApiKey,
+  }: {
+    messages: UIMessage[];
+    transactions: any[];
+    openRouterApiKey?: string;
+  } = await req.json();
+
+  if (!openRouterApiKey) {
+    return new Response("Missing OpenRouter API key", { status: 401 });
+  }
 
   // Calculate financial summary for context
   const totalExpense = transactions
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
-  
+
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -26,11 +38,11 @@ export async function POST(req: Request) {
   const thisMonthTransactions = transactions.filter(
     (t) => new Date(t.date).getMonth() === currentMonth
   );
-  
+
   const thisMonthExpense = thisMonthTransactions
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
-  
+
   const thisMonthIncome = thisMonthTransactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -49,7 +61,12 @@ This Month:
 
 Category Breakdown:
 ${Object.entries(categoryBreakdown)
-  .map(([cat, data]: [string, any]) => `- ${cat}: Spent $${data.expense.toFixed(2)}, Earned $${data.income.toFixed(2)}`)
+  .map(
+    ([cat, data]: [string, any]) =>
+      `- ${cat}: Spent $${data.expense.toFixed(
+        2
+      )}, Earned $${data.income.toFixed(2)}`
+  )
   .join("\n")}
 
 Total Transactions: ${transactions.length}
@@ -69,8 +86,12 @@ Guidelines:
 - When asked about trends, analyze the data provided
 - Format numbers as currency with $ sign`;
 
+  const openrouter = createOpenRouter({
+    apiKey: openRouterApiKey,
+  });
+
   const result = streamText({
-    model: openai("gpt-4o-mini"),
+    model: openrouter("z-ai/glm-4.5-air:free"),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
   });
