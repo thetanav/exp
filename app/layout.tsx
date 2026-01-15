@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import { Geist, Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -17,6 +18,7 @@ export default function RootLayout({
         <div className="w-full min-h-screen h-[100dvh] max-w-md mx-auto border border-l border-r">
           {children}
         </div>
+        <Analytics />
       </body>
     </html>
   );
