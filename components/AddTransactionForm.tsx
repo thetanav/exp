@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,12 +24,15 @@ export default function AddTransactionForm({
   type,
   onClose,
 }: AddTransactionFormProps) {
+  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]?.name ?? "");
-  const [date, setDate] = useState<Date>(new Date());
+  const [selectedCategory, setSelectedCategory] = useState(
+    categories[0]?.name ?? ""
+  );
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     const parsedAmount = Number.parseFloat(amount);
@@ -39,7 +44,7 @@ export default function AddTransactionForm({
       title: title.trim(),
       amount: parsedAmount,
       category: selectedCategory,
-      date: date.toISOString(),
+      date: date!.toISOString(),
     });
 
     window.dispatchEvent(new Event("transactions:changed"));
@@ -102,7 +107,7 @@ export default function AddTransactionForm({
       </div>
       <div>
         <Label className="text-xs font-medium">Date</Label>
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant={"outline"}
@@ -111,12 +116,16 @@ export default function AddTransactionForm({
               {date ? format(date, "PPP") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
+          <PopoverContent className="w-auto overflow-hidden p-1" align="start">
             <Calendar
               mode="single"
               selected={date}
-              onSelect={(newDate) => newDate && setDate(newDate)}
-              initialFocus
+              // className="[--cell-size:--spacing(11)] md:[--cell-size:--spacing(12)]"
+              captionLayout="dropdown"
+              onSelect={(date) => {
+                setDate(date);
+                setOpen(false);
+              }}
             />
           </PopoverContent>
         </Popover>

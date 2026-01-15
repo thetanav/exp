@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import * as React from "react";
+import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import BackButton from "@/components/back-button";
 import categories from "@/lib/categories";
-import { CalendarIcon, ListFilterPlus, Search } from "lucide-react";
+import { CalendarIcon, ListFilterPlus, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function FilterPage() {
@@ -33,8 +35,11 @@ export default function FilterPage() {
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[]
   >([]);
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
-  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
+    undefined
+  );
+  const dateFrom = dateRange?.from;
+  const dateTo = dateRange?.to;
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<
     "expense" | "income" | undefined
@@ -67,8 +72,7 @@ export default function FilterPage() {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setDateFrom(undefined);
-    setDateTo(undefined);
+    setDateRange(undefined);
     setSelectedCategories([]);
     setSelectedType(undefined);
   };
@@ -111,58 +115,41 @@ export default function FilterPage() {
                 {/* Date Range */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Date Range</Label>
-                  <div className="flex gap-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !dateFrom && "text-muted-foreground"
-                          )}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dateFrom ? (
-                            format(dateFrom, "MMM dd, yyyy")
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange?.from && "text-muted-foreground"
+                        )}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <span>
+                              {format(dateRange.from, "MMM dd, yyyy")} -{" "}
+                              {format(dateRange.to, "MMM dd, yyyy")}
+                            </span>
                           ) : (
-                            <span>From date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={dateFrom}
-                          onSelect={setDateFrom}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !dateTo && "text-muted-foreground"
-                          )}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dateTo ? (
-                            format(dateTo, "MMM dd, yyyy")
-                          ) : (
-                            <span>To date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={dateTo}
-                          onSelect={setDateTo}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                            format(dateRange.from, "MMM dd, yyyy")
+                          )
+                        ) : (
+                          <span>Pick a date range</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0 overflow-hidden"
+                      align="start">
+                      <Calendar
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Category/Emoji Filter */}
@@ -225,7 +212,8 @@ export default function FilterPage() {
                   <Button
                     variant="outline"
                     onClick={clearFilters}
-                    className="w-full">
+                    className="w-full justify-center gap-2">
+                    <X className="h-4 w-4 opacity-70" />
                     Clear Filters
                   </Button>
                 )}
