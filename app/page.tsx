@@ -91,12 +91,12 @@ export default function Home() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col gap-6">
+    <div className="flex flex-col overflow-y-auto">
       <Expninc
         thisMonthEarning={thisMonthEarning}
         thisMonthExpense={thisMonthExpense}
       />
-      <div className="flex items-center justify-between px-4">
+      <div className="flex items-center justify-between px-4 mb-2">
         <div className="flex gap-1 items-center">
           <ScrollText className="opacity-60 w-4" />
           <h2 className="text-lg font-semibold tracking-tight">Transactions</h2>
@@ -117,7 +117,7 @@ export default function Home() {
           <BottomNav />
         </div>
       </div>
-      <ul className="overflow-x-auto px-4">
+      <ul className="px-4">
         {transactions.length === 0 ? (
           <div className="text-sm text-muted-foreground px-1 py-8 text-center">
             No transactions yet. Tap + to add one.

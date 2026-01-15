@@ -15,7 +15,7 @@ export default function Expninc({
   const total = thisMonthEarning - thisMonthExpense;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2 h-60 bg-linear-to-b from-neutral-100 to-background">
+    <div className="flex flex-col items-center justify-center gap-2 h-56 bg-linear-to-b from-neutral-100 to-background">
       <p className={`text-xl text-black/60 tracking-tight ${serif.className}`}>
         Total balance
       </p>

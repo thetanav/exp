@@ -85,15 +85,13 @@ export default function FilterPage() {
     dateTo;
 
   return (
-    <div className="h-full w-full flex flex-col gap-6 pt-4">
-      <div className="flex items-center justify-between px-4">
-        <div>
-          <BackButton />
-          <h2 className="text-lg font-semibold tracking-tight">Filter</h2>
-        </div>
+    <div className="h-full w-full flex flex-col pt-4">
+      <div className="flex-col items-center justify-between px-4">
+        <BackButton />
+        <h2 className="text-lg font-semibold tracking-tight">Filter</h2>
       </div>
-      <div className="px-4">
-        <div className="flex gap-2 mb-4">
+      <div className="px-4 my-3">
+        <div className="flex gap-1">
           <div className="relative flex-1">
             <Search className="absolute left-2 top-1/2 w-4 -translate-y-1/2 opacity-60" />
             <Input
@@ -140,13 +138,14 @@ export default function FilterPage() {
                     </PopoverTrigger>
                     <PopoverContent
                       className="w-auto p-0 overflow-hidden"
-                      align="start">
+                      align="center">
                       <Calendar
                         mode="range"
                         defaultMonth={dateRange?.from}
                         selected={dateRange}
                         onSelect={setDateRange}
-                        numberOfMonths={2}
+                        numberOfMonths={1} //TODO: on mobile 1 else 2
+                        className="overflow-scroll"
                       />
                     </PopoverContent>
                   </Popover>
