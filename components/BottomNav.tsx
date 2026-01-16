@@ -20,8 +20,8 @@ export default function BottomNav() {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
       <SheetTrigger asChild>
-        <button className="px-3 py-1 rounded-full from-black/60 to-black bg-gradient-to-br shadow">
-          <PlusIcon className="h-4 w-4 text-white" />
+        <button className="px-3 py-1 rounded-full from-black/60 to-black dark:from-white dark:to-neutral-300 bg-gradient-to-br shadow">
+          <PlusIcon className="h-4 w-4 dark:text-black text-white" />
         </button>
       </SheetTrigger>
       <SheetContent

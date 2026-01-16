@@ -58,7 +58,7 @@ export function createMetadata(params: {
       url: params.path,
       images: [
         {
-          url: "/opengraph-image",
+          url: "/opengraph-image.jpg",
           width: 1200,
           height: 630,
           alt: OG_IMAGE_ALT,
@@ -69,7 +69,7 @@ export function createMetadata(params: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/opengraph-image"],
+      images: ["/opengraph-image.jpg"],
     },
   } satisfies Metadata;
 }

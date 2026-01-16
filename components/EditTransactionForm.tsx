@@ -80,6 +80,7 @@ export default function EditTransactionForm({
               className="flex flex-col items-center p-2 h-auto">
               <img
                 src={`https://emojicdn.elk.sh/${category.emoji}?style=apple`}
+                loading="eager"
                 alt={category.name}
                 className="w-9 h-9 mb-1"
               />
@@ -92,7 +93,7 @@ export default function EditTransactionForm({
       </div>
       <Button
         type="submit"
-        className="py-5 text-md bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white shadow mt-4">
+        className="py-5 text-md bg-gradient-to-br from-green-400 to-green-600 active:from-green-500 active:to-green-700 text-white border shadow mt-4">
         Save Changes
       </Button>
     </form>

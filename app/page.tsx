@@ -5,15 +5,22 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   BrainCogIcon,
+  CogIcon,
   EllipsisVerticalIcon,
   FilterIcon,
+  PencilIcon,
   ScrollText,
+  Trash2,
+  Trash2Icon,
+  X,
 } from "lucide-react";
 import {
   deleteTransaction,
+  getCurrencyCode,
   getTransactions,
   Transaction,
 } from "@/utils/dataManager";
+import { CurrencyCode, formatCurrency } from "@/lib/currency";
 import {
   Dialog,
   DialogClose,
@@ -40,9 +47,11 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
 
   useEffect(() => {
     setTransactions(getTransactions());
+    setCurrency(getCurrencyCode());
 
     const onStorage = (event: StorageEvent) => {
       if (event.key === "transactions") {
@@ -51,12 +60,15 @@ export default function Home() {
     };
 
     const onTransactionsChanged = () => setTransactions(getTransactions());
+    const onSettingsChanged = () => setCurrency(getCurrencyCode());
 
     window.addEventListener("storage", onStorage);
     window.addEventListener("transactions:changed", onTransactionsChanged);
+    window.addEventListener("settings:changed", onSettingsChanged);
     return () => {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("transactions:changed", onTransactionsChanged);
+      window.removeEventListener("settings:changed", onSettingsChanged);
     };
   }, []);
 
@@ -114,13 +126,19 @@ export default function Home() {
         </div>
         <div className="flex gap-1">
           <Link
-            className="px-3 py-1 rounded-full bg-accent flex items-center"
+            className="px-3 py-1 rounded-full bg-accent flex items-center border"
+            href="/settings"
+            aria-label="Analysis">
+            <CogIcon className="h-4 w-4 text-foreground" />
+          </Link>
+          <Link
+            className="px-3 py-1 rounded-full bg-accent flex items-center border"
             href="/analysis"
             aria-label="Analysis">
             <BrainCogIcon className="h-4 w-4 text-foreground" />
           </Link>
           <Link
-            className="px-3 py-1 rounded-full bg-accent flex items-center"
+            className="px-3 py-1 rounded-full bg-accent flex items-center border"
             href="/filter"
             aria-label="Filter">
             <FilterIcon className="h-4 w-4 text-foreground" />
@@ -153,8 +171,8 @@ export default function Home() {
                       ? "text-red-500"
                       : "text-green-500"
                   }`}>
-                  {transaction.type === "expense" ? "-" : "+"}$
-                  {transaction.amount.toFixed(2)}
+                  {transaction.type === "expense" ? "-" : "+"}
+                  {formatCurrency(transaction.amount, currency)}
                 </span>
 
                 <DropdownMenu modal={false}>
@@ -197,9 +215,10 @@ function deleteDialog({
   handleDelete: (id: string) => void;
 }) {
   return (
-    <Dialog modal={false}>
+    <Dialog modal={true}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="w-full cursor-pointer justify-start">
+          <Trash2Icon className="opacity-60" />
           Delete
         </Button>
       </DialogTrigger>
@@ -212,12 +231,17 @@ function deleteDialog({
         </DialogHeader>
         <DialogFooter className="flex flex-row gap-2 justify-end">
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">
+              {" "}
+              <X />
+              Cancel
+            </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
               onClick={() => handleDelete(transaction.id)}
               variant="destructive">
+              <Trash2 />
               Delete
             </Button>
           </DialogClose>
@@ -234,12 +258,13 @@ function editDialog({
   handleEditComplete,
 }: any) {
   return (
-    <Dialog modal={false}>
+    <Dialog modal={true}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
           className="w-full cursor-pointer justify-start"
           onClick={() => handleEdit(transaction)}>
+          <PencilIcon className="opacity-60" />
           Edit
         </Button>
       </DialogTrigger>

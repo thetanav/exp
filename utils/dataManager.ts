@@ -1,10 +1,34 @@
 export interface Transaction {
   id: string;
-  type: 'expense' | 'income';
+  type: "expense" | "income";
   title: string;
   amount: number;
   category: string;
   date: string;
+}
+
+import { CurrencyCode } from "@/lib/currency";
+
+const CURRENCY_STORAGE_KEY = "settings:currency";
+
+export function setCurrencyCode(currency: CurrencyCode): void {
+  localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
+  window.dispatchEvent(new Event("settings:changed"));
+}
+
+export function getCurrencyCode(): CurrencyCode {
+  const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
+  if (
+    stored === "USD" ||
+    stored === "INR" ||
+    stored === "EUR" ||
+    stored === "JPY" ||
+    stored === "CNY"
+  ) {
+    return stored;
+  }
+
+  return "USD";
 }
 
 export function saveTransaction(transaction: Omit<Transaction, 'id' | 'date'> & { date?: string }) {

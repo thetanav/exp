@@ -9,7 +9,9 @@ import {
   getAdvancedFilteredTransactions,
   FilterOptions,
   Transaction,
+  getCurrencyCode,
 } from "@/utils/dataManager";
+import { CurrencyCode, formatCurrency } from "@/lib/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +48,14 @@ export default function FilterPage() {
     "expense" | "income" | undefined
   >(undefined);
   const isMobile = useIsMobile();
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
+
+  useEffect(() => {
+    setCurrency(getCurrencyCode());
+    const onSettingsChanged = () => setCurrency(getCurrencyCode());
+    window.addEventListener("settings:changed", onSettingsChanged);
+    return () => window.removeEventListener("settings:changed", onSettingsChanged);
+  }, []);
 
   useEffect(() => {
     const options: FilterOptions = {
@@ -251,7 +261,7 @@ export default function FilterPage() {
                   className={`font-semibold mr-2 ${
                     transaction.type === "expense" && "text-red-500"
                   }`}>
-                  ${transaction.amount.toFixed(2)}
+                  {formatCurrency(transaction.amount, currency)}
                 </span>
               </div>
             </li>
