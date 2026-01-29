@@ -36,19 +36,11 @@ export default function Expninc({
         className={`text-xl text-foreground/60 tracking-tight ${serif.className}`}>
         Total balance
       </p>
-      <AnimatePresence mode="wait">
-        <motion.h2
-          key={total}
-          initial={{ y: 5, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -20, opacity: 0 }}
-          transition={{ duration: 0.1, ease: "linear" }}
-          className={`text-4xl font-semibold transition-all ${
-            total < 0 ? "text-red-500" : ""
+      <h2
+        className={`text-4xl font-semibold transition-all ${total < 0 ? "text-red-500" : ""
           } ${mono.className}`}>
-          {formatCurrency(total, currency)}
-        </motion.h2>
-      </AnimatePresence>
+        {formatCurrency(total, currency)}
+      </h2>
     </div>
   );
 }

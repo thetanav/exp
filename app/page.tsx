@@ -154,55 +154,48 @@ export default function Home() {
           [...transactions]
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .map((transaction) => (
-            <li
-              key={transaction.id}
-              className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
-              <div>
-                <div className="flex gap-1 items-center text-xs text-muted-foreground">
-                  <p>{format(new Date(transaction.date), "MMM d, yyyy")}</p>
-                  <p>•</p>
-                  <p>{transaction.category}</p>
+              <li
+                key={transaction.id}
+                className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
+                <div>
+                  <div className="flex gap-1 items-center text-xs text-muted-foreground">
+                    <p>{format(new Date(transaction.date), "MMM d, yyyy")}</p>
+                    <p>•</p>
+                    <p>{transaction.category}</p>
+                  </div>
+                  <p className="font-medium">{transaction.title}</p>
                 </div>
-                <p className="font-medium">{transaction.title}</p>
-              </div>
-              <div className="flex items-center">
-                <span
-                  className={`font-semibold mr-2 ${
-                    transaction.type === "expense"
-                      ? "text-red-500"
-                      : "text-green-500"
-                  }`}>
-                  {transaction.type === "expense" ? "-" : "+"}
-                  {formatCurrency(transaction.amount, currency)}
-                </span>
+                <div className="flex items-center">
+                  <span
+                    className={`font-semibold mr-2 ${transaction.type === "expense"
+                      ? "text-red-600"
+                      : "text-green-600"
+                      }`}>
+                    {transaction.type === "expense" ? "-" : "+"}
+                    {formatCurrency(transaction.amount, currency)}
+                  </span>
 
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <button aria-label="Transaction options">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="outline-none">
                       <EllipsisVerticalIcon className="h-4 w-4 outline-none" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="left">
-                    <DropdownMenuLabel asChild>
-                      <Button
-                        variant="ghost"
-                        className="w-full cursor-pointer justify-start"
-                        onClick={() => handleEdit(transaction)}>
-                        <PencilIcon className="opacity-60" />
-                        Edit
-                      </Button>
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      {deleteDialog({
-                        transaction,
-                        handleDelete,
-                      })}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </li>
-          ))
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="left">
+                      <DropdownMenuLabel asChild>
+                        <Button variant="ghost" className="w-full cursor-pointer justify-start opacity-100 px-2.5" onClick={() => handleEdit(transaction)}>
+                          Edit
+                        </Button>
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        {deleteDialog({
+                          transaction,
+                          handleDelete,
+                        })}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </li>
+            ))
         )}
       </ul>
     </div>
@@ -219,8 +212,7 @@ function deleteDialog({
   return (
     <Dialog modal={true}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full cursor-pointer justify-start">
-          <Trash2Icon className="opacity-60" />
+        <Button variant="ghost" className="w-full cursor-pointer justify-start opacity-45 hover:opacity-100 text-xs">
           Delete
         </Button>
       </DialogTrigger>

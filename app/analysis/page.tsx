@@ -17,6 +17,7 @@ import {
   MenuIcon,
   KeyRoundIcon,
   Trash2Icon,
+  Key,
 } from "lucide-react";
 import { Geist_Mono } from "next/font/google";
 import {
@@ -202,28 +203,28 @@ export default function Analysis() {
       <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
         <div className="flex items-center gap-2">
           <BackButton />
-          {displayMessages.length > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={clearMessages}
-              aria-label="Clear messages"
-              className="h-8 w-8">
-              <Trash2Icon className="h-4 w-4" />
-            </Button>
-          )}
         </div>
 
         <h2 className="text-lg font-semibold tracking-tight">
           Finance Assistant
         </h2>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Settings">
-              <MenuIcon className="h-5 w-5" />
+        <div>
+          {displayMessages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={clearMessages}
+              aria-label="Clear messages">
+              <Trash2Icon className="h-4 w-4 opacity-70" />
             </Button>
-          </DialogTrigger>
+          )}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Settings">
+                <Key className="h-4 w-4 opacity-70" />
+              </Button>
+            </DialogTrigger>
 
             <DialogContent>
               <DialogHeader>
@@ -277,8 +278,10 @@ export default function Analysis() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
 
       <div className="flex-1 min-h-0 px-2 flex flex-col">
+        <div className="flex-1 min-h-0 space-y-3 overflow-y-auto">
           {displayMessages.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground mb-4">
@@ -305,19 +308,19 @@ export default function Analysis() {
                     }`}>
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2 ${message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-background"
                       }`}>
                     {message.role === "user" ? (
-                          <p className="text-sm whitespace-pre-wrap">
-                            {message.parts
-                              .filter(
-                                (part: any): part is { type: "text"; text: string } =>
-                                  part.type === "text"
-                              )
-                              .map((part: { type: "text"; text: string }) => part.text)
-                              .join("")}
-                          </p>
+                      <p className="text-sm whitespace-pre-wrap">
+                        {message.parts
+                          .filter(
+                            (part: any): part is { type: "text"; text: string } =>
+                              part.type === "text"
+                          )
+                          .map((part: { type: "text"; text: string }) => part.text)
+                          .join("")}
+                      </p>
                     ) : (
                       <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
                         {message.parts
@@ -350,7 +353,7 @@ export default function Analysis() {
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="flex gap-2 shrink-0">
+        <form onSubmit={handleSubmit} className="flex gap-2 shrink-0 pb-4">
           <input
             ref={inputRef}
             type="text"
@@ -373,13 +376,6 @@ export default function Analysis() {
           </Button>
         </form>
       </div>
-
-      {/* Footer */}
-      <div className="px-4 py-3 text-center shrink-0">
-        <p className="text-xs text-muted-foreground">
-          ai can make mistakes please recheck
-        </p>
-      </div>
     </div>
   );
-}
+};

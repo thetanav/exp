@@ -65,13 +65,13 @@ export default function BottomNav({ editingTransaction, onEditComplete }: Bottom
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
       <SheetTrigger asChild>
-        <button className="px-3 py-1 rounded-full from-black/60 to-black dark:from-white dark:to-neutral-300 bg-gradient-to-br shadow">
+        <button className="px-3 py-1 rounded-full from-black/60 to-black dark:from-white dark:to-neutral-400 bg-linear-to-br shadow">
           <PlusIcon className="h-4 w-4 dark:text-black text-white" />
         </button>
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="h-[70vh] max-w-md mx-auto rounded-t-2xl overflow-y-auto scrollbar-none">
+        className="h-[60vh] max-w-md mx-auto rounded-t-2xl overflow-y-auto scrollbar-none">
         {renderContent()}
       </SheetContent>
     </Sheet>
