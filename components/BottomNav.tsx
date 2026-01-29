@@ -1,20 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { PlusIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AddTransactionForm from "./AddTransactionForm";
+import TransactionForm from "./TransactionForm";
+import { Transaction } from "@/utils/dataManager";
 
-export default function BottomNav() {
+interface BottomNavProps {
+  editingTransaction?: Transaction | null;
+  onEditComplete?: () => void;
+}
+
+export default function BottomNav({ editingTransaction, onEditComplete }: BottomNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (editingTransaction) {
+      setIsOpen(true);
+    }
+  }, [editingTransaction]);
 
   const handleClose = () => {
     setIsOpen(false);
     window.dispatchEvent(new Event("transactions:changed"));
     router.refresh();
+    if (editingTransaction && onEditComplete) {
+      onEditComplete();
+    }
+  };
+
+  const renderContent = () => {
+    if (editingTransaction) {
+      return (
+        <TransactionForm
+          transaction={editingTransaction}
+          onClose={handleClose}
+        />
+      );
+    }
+
+    return (
+      <Tabs defaultValue="expense" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="expense" className="text-sm py-2">
+            Expense
+          </TabsTrigger>
+          <TabsTrigger value="income" className="text-sm py-2">
+            Income
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="expense">
+          <TransactionForm type="expense" onClose={handleClose} />
+        </TabsContent>
+        <TabsContent value="income">
+          <TransactionForm type="income" onClose={handleClose} />
+        </TabsContent>
+      </Tabs>
+    );
   };
 
   return (
@@ -27,22 +72,7 @@ export default function BottomNav() {
       <SheetContent
         side="bottom"
         className="h-[70vh] max-w-md mx-auto rounded-t-2xl overflow-y-auto scrollbar-none">
-        <Tabs defaultValue="expense" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="expense" className="text-sm py-2">
-              Expense
-            </TabsTrigger>
-            <TabsTrigger value="income" className="text-sm py-2">
-              Income
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="expense">
-            <AddTransactionForm type="expense" onClose={handleClose} />
-          </TabsContent>
-          <TabsContent value="income">
-            <AddTransactionForm type="income" onClose={handleClose} />
-          </TabsContent>
-        </Tabs>
+        {renderContent()}
       </SheetContent>
     </Sheet>
   );

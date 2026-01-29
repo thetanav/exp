@@ -26,6 +26,7 @@ npx tsc --noEmit
 ```
 
 No test framework is currently configured in this project.
+*Never ever start a dev server until I allow*
 
 ## Project Structure
 

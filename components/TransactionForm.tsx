@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveTransaction } from "@/utils/dataManager";
+import { saveTransaction, editTransaction, Transaction } from "@/utils/dataManager";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -15,22 +15,27 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import categories from "@/lib/categories";
 
-interface AddTransactionFormProps {
-  type: "expense" | "income";
+interface TransactionFormProps {
+  type?: "expense" | "income";
+  transaction?: Transaction;
   onClose: () => void;
 }
 
-export default function AddTransactionForm({
-  type,
+export default function TransactionForm({
+  type = "expense",
+  transaction,
   onClose,
-}: AddTransactionFormProps) {
+}: TransactionFormProps) {
+  const isEditing = !!transaction;
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
+  const [title, setTitle] = useState(transaction?.title ?? "");
+  const [amount, setAmount] = useState(transaction?.amount.toString() ?? "");
   const [selectedCategory, setSelectedCategory] = useState(
-    categories[0]?.name ?? ""
+    transaction?.category ?? categories[0]?.name ?? ""
   );
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(
+    transaction ? new Date(transaction.date) : new Date()
+  );
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -41,13 +46,23 @@ export default function AddTransactionForm({
     if (!title.trim()) return;
     if (!date) return;
 
-    saveTransaction({
-      type,
-      title: title.trim(),
-      amount: parsedAmount,
-      category: selectedCategory,
-      date: date.toISOString(),
-    });
+    if (isEditing && transaction) {
+      editTransaction({
+        ...transaction,
+        title: title.trim(),
+        amount: parsedAmount,
+        category: selectedCategory,
+        date: date.toISOString(),
+      });
+    } else {
+      saveTransaction({
+        type,
+        title: title.trim(),
+        amount: parsedAmount,
+        category: selectedCategory,
+        date: date.toISOString(),
+      });
+    }
 
     window.dispatchEvent(new Event("transactions:changed"));
     onClose();
@@ -135,7 +150,7 @@ export default function AddTransactionForm({
       <Button
         type="submit"
         className="py-5 text-md bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white shadow mt-4">
-        Add {type === "expense" ? "Expense" : "Income"}
+        {isEditing ? "Save Changes" : `Add ${type === "expense" ? "Expense" : "Income"}`}
       </Button>
     </form>
   );

@@ -7,7 +7,6 @@ import { getTransactions, Transaction } from "@/utils/dataManager";
 import BackButton from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import { Streamdown } from "streamdown";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   SendIcon,
   TrendingUpIcon,
@@ -95,11 +94,43 @@ export default function Analysis() {
     setOpenRouterKeySavedAt(null);
   };
 
+  const [savedMessages, setSavedMessages] = useState<any[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
     }),
   });
+
+  useEffect(() => {
+    const saved = localStorage.getItem("chat_messages");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setSavedMessages(parsed);
+      } catch (e) {
+        console.error("Failed to parse saved messages:", e);
+      }
+    }
+    setHasLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasLoaded && messages.length > 0) {
+      localStorage.setItem("chat_messages", JSON.stringify(messages));
+    }
+  }, [messages, hasLoaded]);
+
+  const clearMessages = () => {
+    localStorage.removeItem("chat_messages");
+    setSavedMessages([]);
+    // Force a page reload to reset the chat state
+    window.location.reload();
+  };
+
+  // Use saved messages if we have them and no current messages
+  const displayMessages = messages.length > 0 ? messages : savedMessages;
 
   const isLoading = status === "streaming" || status === "submitted";
   const hasOpenRouterKey = openRouterApiKey.trim().length > 0;
@@ -131,7 +162,7 @@ export default function Analysis() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [displayMessages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +200,20 @@ export default function Analysis() {
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
-        <BackButton />
+        <div className="flex items-center gap-2">
+          <BackButton />
+          {displayMessages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={clearMessages}
+              aria-label="Clear messages"
+              className="h-8 w-8">
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
         <h2 className="text-lg font-semibold tracking-tight">
           Finance Assistant
         </h2>
@@ -181,63 +225,61 @@ export default function Analysis() {
             </Button>
           </DialogTrigger>
 
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <KeyRoundIcon className="h-4 w-4 opacity-70" />
-                OpenRouter API Key
-              </DialogTitle>
-              <DialogDescription>
-                Saved locally in this browser. Not synced.
-              </DialogDescription>
-            </DialogHeader>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <KeyRoundIcon className="h-4 w-4 opacity-70" />
+                  OpenRouter API Key
+                </DialogTitle>
+                <DialogDescription>
+                  Saved locally in this browser. Not synced.
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="space-y-2">
-              <input
-                type="password"
-                value={openRouterApiKeyDraft}
-                onChange={(e) => setOpenRouterApiKeyDraft(e.target.value)}
-                placeholder="Paste your OpenRouter API key"
-                className="w-full bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
+              <div className="space-y-2">
+                <input
+                  type="password"
+                  value={openRouterApiKeyDraft}
+                  onChange={(e) => setOpenRouterApiKeyDraft(e.target.value)}
+                  placeholder="Paste your OpenRouter API key"
+                  className="w-full bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
 
-              <p className="text-xs text-muted-foreground">
-                {openRouterApiKey
-                  ? `Saved locally${
-                      openRouterKeySavedAt
-                        ? ` · updated ${new Date(
-                            openRouterKeySavedAt
-                          ).toLocaleString()}`
-                        : ""
+                <p className="text-xs text-muted-foreground">
+                  {openRouterApiKey
+                    ? `Saved locally${openRouterKeySavedAt
+                      ? ` · updated ${new Date(
+                        openRouterKeySavedAt
+                      ).toLocaleString()}`
+                      : ""
                     }`
-                  : "Not set yet"}
-              </p>
-            </div>
+                    : "Not set yet"}
+                </p>
+              </div>
 
-            <DialogFooter className="flex flex-row gap-2 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={clearOpenRouterKey}
-                className="gap-2">
-                <Trash2Icon className="h-4 w-4 opacity-70" />
-                Clear
-              </Button>
-              <Button
-                type="button"
-                onClick={saveOpenRouterKey}
-                className="gap-2">
-                <KeyRoundIcon className="h-4 w-4" />
-                Save
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+              <DialogFooter className="flex flex-row gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={clearOpenRouterKey}
+                  className="gap-2">
+                  <Trash2Icon className="h-4 w-4 opacity-70" />
+                  Clear
+                </Button>
+                <Button
+                  type="button"
+                  onClick={saveOpenRouterKey}
+                  className="gap-2">
+                  <KeyRoundIcon className="h-4 w-4" />
+                  Save
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
 
       <div className="flex-1 min-h-0 px-2 flex flex-col">
-        <div className="flex-1 min-h-0 space-y-3 overflow-y-auto">
-          {messages.length === 0 ? (
+          {displayMessages.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground mb-4">
                 Ask me anything about your finances!
@@ -255,40 +297,35 @@ export default function Analysis() {
               </div>
             </div>
           ) : (
-            <AnimatePresence mode="popLayout">
-              {messages.map((message) => (
-                <motion.div
+            <div>
+              {displayMessages.map((message) => (
+                <div
                   key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}>
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
+                    }`}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                      message.role === "user"
+                    className={`max-w-[85%] rounded-2xl px-4 py-2 ${message.role === "user"
                         ? "bg-primary text-primary-foreground"
                         : "bg-background"
-                    }`}>
+                      }`}>
                     {message.role === "user" ? (
-                      <p className="text-sm whitespace-pre-wrap">
-                        {message.parts
-                          .filter(
-                            (part): part is { type: "text"; text: string } =>
-                              part.type === "text"
-                          )
-                          .map((part) => part.text)
-                          .join("")}
-                      </p>
+                          <p className="text-sm whitespace-pre-wrap">
+                            {message.parts
+                              .filter(
+                                (part: any): part is { type: "text"; text: string } =>
+                                  part.type === "text"
+                              )
+                              .map((part: { type: "text"; text: string }) => part.text)
+                              .join("")}
+                          </p>
                     ) : (
                       <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
                         {message.parts
                           .filter(
-                            (part): part is { type: "text"; text: string } =>
+                            (part: any): part is { type: "text"; text: string } =>
                               part.type === "text"
                           )
-                          .map((part, index) => (
+                          .map((part: { type: "text"; text: string }, index: number) => (
                             <Streamdown
                               key={index}
                               isAnimating={status === "streaming"}>
@@ -298,19 +335,16 @@ export default function Analysis() {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               ))}
-              {isLoading && messages[messages.length - 1]?.role === "user" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex justify-start">
+              {isLoading && displayMessages[displayMessages.length - 1]?.role === "user" && (
+                <div className="flex justify-start">
                   <div className="bg-background border border-border rounded-2xl px-4 py-2">
                     <Loader2Icon className="w-4 h-4 animate-spin text-muted-foreground" />
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>

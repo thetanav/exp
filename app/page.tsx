@@ -38,7 +38,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import EditTransactionForm from "@/components/EditTransactionForm";
 import { format } from "date-fns";
 import BottomNav from "@/components/BottomNav";
 import Expninc from "@/components/expninc";
@@ -143,7 +142,7 @@ export default function Home() {
             aria-label="Filter">
             <FilterIcon className="h-4 w-4 text-foreground" />
           </Link>
-          <BottomNav />
+          <BottomNav editingTransaction={editingTransaction} onEditComplete={handleEditComplete} />
         </div>
       </div>
       <ul className="px-4">
@@ -152,7 +151,9 @@ export default function Home() {
             No transactions yet. Tap + to add one.
           </div>
         ) : (
-          transactions.map((transaction) => (
+          [...transactions]
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .map((transaction) => (
             <li
               key={transaction.id}
               className="flex justify-between items-center bg-accent/60 p-3 rounded-xl mb-2">
@@ -183,12 +184,13 @@ export default function Home() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="left">
                     <DropdownMenuLabel asChild>
-                      {editDialog({
-                        transaction,
-                        handleEdit,
-                        handleEditComplete,
-                        editingTransaction,
-                      })}
+                      <Button
+                        variant="ghost"
+                        className="w-full cursor-pointer justify-start"
+                        onClick={() => handleEdit(transaction)}>
+                        <PencilIcon className="opacity-60" />
+                        Edit
+                      </Button>
                     </DropdownMenuLabel>
                     <DropdownMenuItem asChild>
                       {deleteDialog({
@@ -246,38 +248,6 @@ function deleteDialog({
             </Button>
           </DialogClose>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function editDialog({
-  transaction,
-  handleEdit,
-  editingTransaction,
-  handleEditComplete,
-}: any) {
-  return (
-    <Dialog modal={true}>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full cursor-pointer justify-start"
-          onClick={() => handleEdit(transaction)}>
-          <PencilIcon className="opacity-60" />
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Transaction</DialogTitle>
-        </DialogHeader>
-        {editingTransaction && (
-          <EditTransactionForm
-            transaction={editingTransaction}
-            onComplete={handleEditComplete}
-          />
-        )}
       </DialogContent>
     </Dialog>
   );

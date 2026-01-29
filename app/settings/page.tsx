@@ -15,17 +15,15 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCurrencyCode, setCurrencyCode } from "@/utils/dataManager";
 import { CurrencyCode, CURRENCY_OPTIONS } from "@/lib/currency";
+import { useTheme } from "next-themes";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function SettingsPage() {
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { setTheme, theme } = useTheme()
 
   useEffect(() => {
     setCurrency(getCurrencyCode());
-    const savedTheme = localStorage.getItem("theme");
-    const isDark = savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setIsDarkMode(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
   }, []);
 
   const handleCurrencyChange = (value: CurrencyCode) => {
@@ -33,11 +31,13 @@ export default function SettingsPage() {
     setCurrencyCode(value);
   };
 
-  const handleThemeChange = (checked: boolean) => {
-    setIsDarkMode(checked);
-    document.documentElement.classList.toggle("dark", checked);
-    localStorage.setItem("theme", checked ? "dark" : "light");
-  };
+  const handleThemeChange = () => {
+    if (theme === "dark") {
+      setTheme("light")
+    } else {
+      setTheme("dark")
+    }
+  }
 
   return (
     <div className="h-full w-full flex flex-col pt-4">
@@ -82,7 +82,7 @@ export default function SettingsPage() {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="dark-mode"
-              checked={isDarkMode}
+              checked={theme === "dark"}
               onCheckedChange={handleThemeChange}
             />
             <Label

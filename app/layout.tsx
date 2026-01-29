@@ -4,6 +4,7 @@ import { Geist, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 
 import { createMetadata } from "@/lib/seo";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -24,9 +25,15 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body
         className={`${geist.className} min-h-screen bg-background text-foreground antialiased`}>
-        <div className="w-full min-h-screen h-[100dvh] max-w-md mx-auto border border-l border-r">
-          {children}
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
+          <div className="w-full min-h-screen h-screen max-w-md mx-auto border-l border-r">
+            {children}
+          </div>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
