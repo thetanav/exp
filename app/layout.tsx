@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html>
       <body
         className={`${geist.className} min-h-screen bg-background text-foreground antialiased`}>
         <ThemeProvider

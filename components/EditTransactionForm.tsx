@@ -93,7 +93,7 @@ export default function EditTransactionForm({
       </div>
       <Button
         type="submit"
-        className="py-5 text-md bg-gradient-to-br from-green-400 to-green-600 active:from-green-500 active:to-green-700 text-white border shadow mt-4">
+        className="py-5 text-md bg-linear-to-br from-green-400 to-green-600 active:from-green-500 active:to-green-700 text-white border shadow mt-4">
         Save Changes
       </Button>
     </form>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,15 @@ export default function TransactionForm({
     transaction ? new Date(transaction.date) : new Date()
   );
 
+  useEffect(() => {
+    if (transaction) {
+      setTitle(transaction.title);
+      setAmount(transaction.amount.toString());
+      setSelectedCategory(transaction.category);
+      setDate(new Date(transaction.date));
+    }
+  }, [transaction]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
@@ -64,7 +73,6 @@ export default function TransactionForm({
       });
     }
 
-    window.dispatchEvent(new Event("transactions:changed"));
     onClose();
   };
 

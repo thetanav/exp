@@ -8,10 +8,8 @@ import {
   CogIcon,
   EllipsisVerticalIcon,
   FilterIcon,
-  PencilIcon,
   ScrollText,
   Trash2,
-  Trash2Icon,
   X,
 } from "lucide-react";
 import {
@@ -20,7 +18,7 @@ import {
   getTransactions,
   Transaction,
 } from "@/utils/dataManager";
-import { CurrencyCode, formatCurrency } from "@/lib/currency";
+import { cstr, CurrencyCode } from "@/lib/currency";
 import {
   Dialog,
   DialogClose,
@@ -29,13 +27,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
@@ -47,6 +43,8 @@ export default function Home() {
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
+  const [deletingTransaction, setDeletingTransaction] =
+    useState<Transaction | null>(null);
 
   useEffect(() => {
     setTransactions(getTransactions());
@@ -99,8 +97,7 @@ export default function Home() {
 
   const handleDelete = (id: string) => {
     deleteTransaction(id);
-    setTransactions(getTransactions());
-    window.dispatchEvent(new Event("transactions:changed"));
+    setDeletingTransaction(null);
   };
 
   const handleEdit = (transaction: Transaction) => {
@@ -172,7 +169,8 @@ export default function Home() {
                       : "text-green-600"
                       }`}>
                     {transaction.type === "expense" ? "-" : "+"}
-                    {formatCurrency(transaction.amount, currency)}
+                    {cstr(currency)}
+                    {transaction.amount}
                   </span>
 
                   <DropdownMenu>
@@ -180,16 +178,23 @@ export default function Home() {
                       <EllipsisVerticalIcon className="h-4 w-4 outline-none" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="left">
-                      <DropdownMenuLabel asChild>
-                        <Button variant="ghost" className="w-full cursor-pointer justify-start opacity-100 px-2.5" onClick={() => handleEdit(transaction)}>
+                      <DropdownMenuItem asChild>
+                        <Button 
+                          variant="ghost" 
+                          className="w-full cursor-pointer justify-start opacity-100 px-2.5" 
+                          onClick={() => handleEdit(transaction)}
+                        >
                           Edit
                         </Button>
-                      </DropdownMenuLabel>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        {deleteDialog({
-                          transaction,
-                          handleDelete,
-                        })}
+                        <Button 
+                          variant="ghost" 
+                          className="w-full cursor-pointer justify-start opacity-45 hover:opacity-100 text-xs text-red-500"
+                          onClick={() => setDeletingTransaction(transaction)}
+                        >
+                          Delete
+                        </Button>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -198,49 +203,31 @@ export default function Home() {
             ))
         )}
       </ul>
-    </div>
-  );
-}
 
-function deleteDialog({
-  transaction,
-  handleDelete,
-}: {
-  transaction: Transaction;
-  handleDelete: (id: string) => void;
-}) {
-  return (
-    <Dialog modal={true}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full cursor-pointer justify-start opacity-45 hover:opacity-100 text-xs">
-          Delete
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Transaction</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete this transaction?
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="flex flex-row gap-2 justify-end">
-          <DialogClose asChild>
-            <Button variant="outline">
-              {" "}
-              <X />
-              Cancel
-            </Button>
-          </DialogClose>
-          <DialogClose asChild>
+      <Dialog open={!!deletingTransaction} onOpenChange={(open) => !open && setDeletingTransaction(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Transaction</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{deletingTransaction?.title}"?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row gap-2 justify-end">
+            <DialogClose asChild>
+              <Button variant="outline">
+                <X />
+                Cancel
+              </Button>
+            </DialogClose>
             <Button
-              onClick={() => handleDelete(transaction.id)}
+              onClick={() => deletingTransaction && handleDelete(deletingTransaction.id)}
               variant="destructive">
               <Trash2 />
               Delete
             </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

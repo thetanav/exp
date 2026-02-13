@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Geist_Mono } from "next/font/google";
-import { motion, AnimatePresence } from "framer-motion";
 import { Instrument_Serif } from "next/font/google";
-import { formatCurrency, CurrencyCode } from "@/lib/currency";
+import { cstr, CurrencyCode } from "@/lib/currency";
 import { getCurrencyCode } from "@/utils/dataManager";
+import NumberFlow from '@number-flow/react'
 
 const mono = Geist_Mono({ subsets: ["latin"] });
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400" });
@@ -37,9 +37,10 @@ export default function Expninc({
         Total balance
       </p>
       <h2
-        className={`text-4xl font-semibold transition-all ${total < 0 ? "text-red-500" : ""
+        className={`text-4xl font-semibold transition-all select-none ${total < 0 ? "text-red-500" : ""
           } ${mono.className}`}>
-        {formatCurrency(total, currency)}
+        {cstr(currency)}
+        <NumberFlow value={total} />
       </h2>
     </div>
   );

@@ -40,6 +40,7 @@ export function saveTransaction(transaction: Omit<Transaction, 'id' | 'date'> & 
   };
   transactions.push(newTransaction);
   localStorage.setItem('transactions', JSON.stringify(transactions));
+  window.dispatchEvent(new Event("transactions:changed"));
 }
 
 export function getTransactions(): Transaction[] {
@@ -118,6 +119,7 @@ export function deleteTransaction(id: string) {
   const transactions = getTransactions();
   const updatedTransactions = transactions.filter(t => t.id !== id);
   localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+  window.dispatchEvent(new Event("transactions:changed"));
 }
 
 export function editTransaction(updatedTransaction: Transaction) {
@@ -126,6 +128,7 @@ export function editTransaction(updatedTransaction: Transaction) {
   if (index !== -1) {
     transactions[index] = updatedTransaction;
     localStorage.setItem('transactions', JSON.stringify(transactions));
+    window.dispatchEvent(new Event("transactions:changed"));
   }
 }
 

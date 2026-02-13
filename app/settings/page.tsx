@@ -77,6 +77,8 @@ export default function SettingsPage() {
           </p>
         </div>
 
+        <a href="https://shoo.dev/authorize?redirect_uri=http://localhost:3000/success">Login</a>
+
         <div className="space-y-2">
           <Label className="text-sm font-medium">Theme</Label>
           <div className="flex items-center space-x-2">

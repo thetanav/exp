@@ -11,7 +11,7 @@ import {
   Transaction,
   getCurrencyCode,
 } from "@/utils/dataManager";
-import { CurrencyCode, formatCurrency } from "@/lib/currency";
+import { CurrencyCode, cstr } from "@/lib/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,14 +50,7 @@ export default function FilterPage() {
   const isMobile = useIsMobile();
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
 
-  useEffect(() => {
-    setCurrency(getCurrencyCode());
-    const onSettingsChanged = () => setCurrency(getCurrencyCode());
-    window.addEventListener("settings:changed", onSettingsChanged);
-    return () => window.removeEventListener("settings:changed", onSettingsChanged);
-  }, []);
-
-  useEffect(() => {
+  const applyFilters = () => {
     const options: FilterOptions = {
       search: searchQuery || undefined,
       categories:
@@ -68,6 +61,19 @@ export default function FilterPage() {
     };
     setFilterOptions(options);
     setFilteredTransactions(getAdvancedFilteredTransactions(options));
+  };
+
+  useEffect(() => {
+    setCurrency(getCurrencyCode());
+    const onSettingsChanged = () => setCurrency(getCurrencyCode());
+    window.addEventListener("settings:changed", onSettingsChanged);
+    return () => window.removeEventListener("settings:changed", onSettingsChanged);
+  }, []);
+
+  useEffect(() => {
+    const onTransactionsChanged = () => applyFilters();
+    window.addEventListener("transactions:changed", onTransactionsChanged);
+    return () => window.removeEventListener("transactions:changed", onTransactionsChanged);
   }, [searchQuery, selectedCategories, selectedType, dateFrom, dateTo]);
 
   const toggleCategory = (category: string) => {
@@ -259,9 +265,10 @@ export default function FilterPage() {
               <div className="flex items-center">
                 <span
                   className={`font-semibold mr-2 ${
-                    transaction.type === "expense" && "text-red-500"
+                    transaction.type === "expense" ? "text-red-500" : "text-green-600"
                   }`}>
-                  {formatCurrency(transaction.amount, currency)}
+                  {transaction.type === "expense" ? "-" : "+"}
+                  {cstr(currency)}{transaction.amount}
                 </span>
               </div>
             </li>

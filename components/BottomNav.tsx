@@ -15,64 +15,82 @@ interface BottomNavProps {
 
 export default function BottomNav({ editingTransaction, onEditComplete }: BottomNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [formKey, setFormKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     if (editingTransaction) {
       setIsOpen(true);
+      setFormKey(prev => prev + 1);
     }
   }, [editingTransaction]);
 
   const handleClose = () => {
     setIsOpen(false);
-    window.dispatchEvent(new Event("transactions:changed"));
-    router.refresh();
     if (editingTransaction && onEditComplete) {
       onEditComplete();
     }
   };
 
-  const renderContent = () => {
-    if (editingTransaction) {
-      return (
-        <TransactionForm
-          transaction={editingTransaction}
-          onClose={handleClose}
-        />
-      );
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setFormKey(prev => prev + 1);
+      if (editingTransaction && onEditComplete) {
+        onEditComplete();
+      }
     }
+  };
 
-    return (
-      <Tabs defaultValue="expense" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="expense" className="text-sm py-2">
-            Expense
-          </TabsTrigger>
-          <TabsTrigger value="income" className="text-sm py-2">
-            Income
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="expense">
-          <TransactionForm type="expense" onClose={handleClose} />
-        </TabsContent>
-        <TabsContent value="income">
-          <TransactionForm type="income" onClose={handleClose} />
-        </TabsContent>
-      </Tabs>
-    );
+  const handleTriggerClick = () => {
+    setFormKey(prev => prev + 1);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen} modal={false}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <button className="px-3 py-1 rounded-full from-black/60 to-black dark:from-white dark:to-neutral-400 bg-linear-to-br shadow">
+        <button 
+          className="px-3 py-1 rounded-full from-black/60 to-black dark:from-white dark:to-neutral-400 bg-linear-to-br shadow"
+          onClick={handleTriggerClick}
+        >
           <PlusIcon className="h-4 w-4 dark:text-black text-white" />
         </button>
       </SheetTrigger>
       <SheetContent
         side="bottom"
         className="h-[60vh] max-w-md mx-auto rounded-t-2xl overflow-y-auto scrollbar-none">
-        {renderContent()}
+        {editingTransaction ? (
+          <TransactionForm
+            key={`edit-${editingTransaction.id}`}
+            transaction={editingTransaction}
+            onClose={handleClose}
+          />
+        ) : (
+          <Tabs defaultValue="expense" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="expense" className="text-sm py-2">
+                Expense
+              </TabsTrigger>
+              <TabsTrigger value="income" className="text-sm py-2">
+                Income
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="expense">
+              <TransactionForm 
+                key={`expense-${formKey}`}
+                type="expense" 
+                onClose={handleClose} 
+              />
+            </TabsContent>
+            <TabsContent value="income">
+              <TransactionForm 
+                key={`income-${formKey}`}
+                type="income" 
+                onClose={handleClose} 
+              />
+            </TabsContent>
+          </Tabs>
+        )}
       </SheetContent>
     </Sheet>
   );
